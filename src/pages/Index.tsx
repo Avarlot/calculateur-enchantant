@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import {
   LineChart,
   Line,
@@ -27,11 +28,18 @@ const Calculator = () => {
   const [years, setYears] = useState(10);
   const [compareMode, setCompareMode] = useState(false);
   const [interestRate2, setInterestRate2] = useState(7);
+  const [initialAmount2, setInitialAmount2] = useState(1000);
+  const [monthlyContribution2, setMonthlyContribution2] = useState(100);
+
+  const syncValues = () => {
+    setInitialAmount2(initialAmount);
+    setMonthlyContribution2(monthlyContribution);
+  };
 
   const calculateResults = (): CalculationResult[] => {
     const results: CalculationResult[] = [];
     let balance = initialAmount;
-    let balance2 = initialAmount;
+    let balance2 = compareMode ? initialAmount2 : initialAmount;
 
     for (let year = 0; year <= years; year++) {
       const result: CalculationResult = {
@@ -49,7 +57,7 @@ const Calculator = () => {
         (balance + monthlyContribution * 12) * (1 + interestRate / 100);
       if (compareMode) {
         balance2 =
-          (balance2 + monthlyContribution * 12) * (1 + interestRate2 / 100);
+          (balance2 + monthlyContribution2 * 12) * (1 + interestRate2 / 100);
       }
     }
 
@@ -137,18 +145,60 @@ const Calculator = () => {
               </div>
 
               {compareMode && (
-                <div className="space-y-2 animate-slide-up">
-                  <Label>
-                    Taux d'intérêt stratégie 2: {interestRate2}%
-                  </Label>
-                  <Slider
-                    value={[interestRate2]}
-                    onValueChange={([value]) => setInterestRate2(value)}
-                    min={0}
-                    max={20}
-                    step={0.1}
-                    className="w-full"
-                  />
+                <div className="space-y-4 animate-slide-up border-t pt-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-medium text-gray-700">
+                      Paramètres de la stratégie 2
+                    </h3>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={syncValues}
+                      className="text-sm"
+                    >
+                      Copier les valeurs de la stratégie 1
+                    </Button>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Montant initial: {initialAmount2}€</Label>
+                    <Slider
+                      value={[initialAmount2]}
+                      onValueChange={([value]) => setInitialAmount2(value)}
+                      min={0}
+                      max={100000}
+                      step={1000}
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>
+                      Contribution mensuelle: {monthlyContribution2}€
+                    </Label>
+                    <Slider
+                      value={[monthlyContribution2]}
+                      onValueChange={([value]) => setMonthlyContribution2(value)}
+                      min={0}
+                      max={5000}
+                      step={50}
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>
+                      Taux d'intérêt stratégie 2: {interestRate2}%
+                    </Label>
+                    <Slider
+                      value={[interestRate2]}
+                      onValueChange={([value]) => setInterestRate2(value)}
+                      min={0}
+                      max={20}
+                      step={0.1}
+                      className="w-full"
+                    />
+                  </div>
                 </div>
               )}
             </div>
