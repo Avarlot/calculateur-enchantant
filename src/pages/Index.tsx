@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
@@ -30,34 +29,37 @@ const Calculator = () => {
   const [interestRate2, setInterestRate2] = useState(7);
   const [initialAmount2, setInitialAmount2] = useState(1000);
   const [monthlyContribution2, setMonthlyContribution2] = useState(100);
+  const [years2, setYears2] = useState(10);
 
   const syncValues = () => {
     setInitialAmount2(initialAmount);
     setMonthlyContribution2(monthlyContribution);
+    setYears2(years);
   };
 
   const calculateResults = (): CalculationResult[] => {
     const results: CalculationResult[] = [];
     let balance = initialAmount;
     let balance2 = compareMode ? initialAmount2 : initialAmount;
+    const maxYears = Math.max(years, years2);
 
-    for (let year = 0; year <= years; year++) {
+    for (let year = 0; year <= maxYears; year++) {
       const result: CalculationResult = {
         year,
         amount: Math.round(balance),
       };
 
-      if (compareMode) {
+      if (compareMode && year <= years2) {
         result.amount2 = Math.round(balance2);
       }
 
       results.push(result);
 
-      balance =
-        (balance + monthlyContribution * 12) * (1 + interestRate / 100);
-      if (compareMode) {
-        balance2 =
-          (balance2 + monthlyContribution2 * 12) * (1 + interestRate2 / 100);
+      if (year < years) {
+        balance = (balance + monthlyContribution * 12) * (1 + interestRate / 100);
+      }
+      if (compareMode && year < years2) {
+        balance2 = (balance2 + monthlyContribution2 * 12) * (1 + interestRate2 / 100);
       }
     }
 
@@ -65,8 +67,8 @@ const Calculator = () => {
   };
 
   const results = calculateResults();
-  const finalAmount = results[results.length - 1].amount;
-  const finalAmount2 = results[results.length - 1].amount2;
+  const finalAmount = results[years].amount;
+  const finalAmount2 = compareMode ? results[years2].amount2 : undefined;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white p-4 sm:p-8">
@@ -168,7 +170,7 @@ const Calculator = () => {
                       min={0}
                       max={100000}
                       step={1000}
-                      className="w-full"
+                      className="w-full [&>.bg-primary]:bg-blue-600"
                     />
                   </div>
 
@@ -182,7 +184,7 @@ const Calculator = () => {
                       min={0}
                       max={5000}
                       step={50}
-                      className="w-full"
+                      className="w-full [&>.bg-primary]:bg-blue-600"
                     />
                   </div>
 
@@ -196,7 +198,19 @@ const Calculator = () => {
                       min={0}
                       max={20}
                       step={0.1}
-                      className="w-full"
+                      className="w-full [&>.bg-primary]:bg-blue-600"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Période stratégie 2 (années): {years2}</Label>
+                    <Slider
+                      value={[years2]}
+                      onValueChange={([value]) => setYears2(value)}
+                      min={1}
+                      max={50}
+                      step={1}
+                      className="w-full [&>.bg-primary]:bg-blue-600"
                     />
                   </div>
                 </div>
@@ -278,7 +292,7 @@ const Calculator = () => {
                 }).format(finalAmount)}
               </p>
             </div>
-            {compareMode && (
+            {compareMode && finalAmount2 !== undefined && (
               <div className="animate-slide-up">
                 <h3 className="text-lg font-medium text-gray-600">
                   Montant final (Stratégie 2)
